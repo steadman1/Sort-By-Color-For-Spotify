@@ -1,1 +1,1 @@
-# SortByColor-forSpotify
+# Sort Your Music by Color
