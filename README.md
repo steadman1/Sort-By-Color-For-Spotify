@@ -25,6 +25,9 @@ Hue sorting was definitely the move, and I was able to accomplish exactly what I
 3. Next, I use a step to grab half of each of the colors starting from 0 and 1 respectively. This essentially allowed me to create 2 lists of colors both going from light to dark.
 4. Finally, I reverse the second list and combine the two lists into one making the combination go from light to dark and back to light allowing the colors, at least in a perfect world, to perfectly match between colors as they blend from as close to white as possible of one hue to as close to white as possible of another hue.
 
+### Update & Final Final Thoughts
+Hue sorting was the move until I researched Self Observing Maps. This technique helped massively in making the spread of colors more continuous. I also realized after finishing the "Final Thoughts / Conclusion" section that using my hacky split and combination technique for the hue sorting algorithm caused tracks with the sone album art to be seperated which didn't make much sense.
+
 ### Remarks
  - I used Swift 5 syntax for the pseudocode parts as I'm most familiar with it despite this project being in Python (sorry for that)
 
