@@ -1,14 +1,12 @@
 import pygame
 from math import sqrt
 import numpy as np
-from colormath.color_objects import LabColor, LCHabColor
-from colormath.color_conversions import convert_color
 from scipy.spatial.distance import pdist, squareform
 from scipy.optimize import linear_sum_assignment
-from itertools import groupby
+from minisom import MiniSom
 
 
-def init_color_display(colors):
+def init_color_display(colors_with_ids):
     pygame.init()
 
     # Screen dimensions and setup
@@ -17,7 +15,7 @@ def init_color_display(colors):
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption("Color Display")
 
-    color_width = screen_width // len(colors)
+    color_width = screen_width // len(colors_with_ids)
 
     # Main loop
     running = True
@@ -30,8 +28,8 @@ def init_color_display(colors):
         screen.fill((255, 255, 255))
 
         # Draw the color rectangles
-        for i, color in enumerate(colors):
-            pygame.draw.rect(screen, pygame.Color(color), (i * color_width, 0, color_width, screen_height))
+        for i, color_with_id in enumerate(colors_with_ids):
+            pygame.draw.rect(screen, pygame.Color(color_with_id[0]), (i * color_width, 0, color_width, screen_height))
 
         # Update the display
         pygame.display.flip()
@@ -39,6 +37,8 @@ def init_color_display(colors):
     # Clean up
     pygame.quit()
 
+def generate_colors_with_ids(n_colors):
+    return [(np.random.rand(3) * 255.0, i) for i in range(n_colors)]
 
 def sort_by_color_distance(colors):
     colors = np.array(colors) / 255.0
@@ -61,13 +61,12 @@ def sort_by_luminance(colors):
         luminances.append(luminance)
     return [color for (_, color) in sorted(zip(luminances, colors), reverse=True)]
 
-def sort_by_greyscale(colors):
-
+def sort_by_greyscale(colors_with_ids):
     brightnesses = []
-    for color in colors:
-        brightness = sqrt(0.299 * pow(color[0], 2) + 0.587 * pow(color[1], 2) + 0.114 * pow(color[2], 2)) 
+    for color_with_id in colors_with_ids:
+        brightness = sqrt(0.299 * pow(color_with_id[0][0], 2) + 0.587 * pow(color_with_id[0][1], 2) + 0.114 * pow(color_with_id[0][2], 2)) 
         brightnesses.append(brightness)
-    return [color for (_, color) in sorted(zip(brightnesses, colors), reverse=True)]
+    return [color_with_id for (_, color_with_id) in sorted(zip(brightnesses, colors_with_ids), reverse=True)]
 
 def get_hue(color):
     r = color[0] / 255
@@ -97,7 +96,7 @@ def sort_by_hue(colors):
         
     return [color for (_, color) in sorted(zip(hues, colors))]
 
-def sort_by_rainbow(colors):
+def sort_by_rainbow(colors_with_ids):
     hue_ranges = {
         'red': [(0.0, 0.083), (0.917, 1.001)],
         'yellow': [(0.083, 0.25)],
@@ -109,29 +108,54 @@ def sort_by_rainbow(colors):
 
     categorized_colors = {color: [] for color in hue_ranges}
 
-    for color in colors:
-        hue = get_hue(color) / 360
+    for color_with_id in colors_with_ids:
+        hue = get_hue(color_with_id[0]) / 360
         for rainbow_color, hue_range in hue_ranges.items():
             for (low, high) in hue_range:
                 if low <= hue < high:
-                    categorized_colors[rainbow_color].append(color)
+                    categorized_colors[rainbow_color].append(color_with_id)
                     break
 
     straight_colors = []
 
     for hue_range in hue_ranges:
         sorted_hue = sort_by_greyscale(categorized_colors[hue_range])
-        head = sorted_hue[0::2]
-        tail = sorted_hue[1::2]
-        straight_colors += head + tail[::-1]
+        
+        # head = sorted_hue[0::2]
+        # tail = sorted_hue[1::2]
+        # straight_colors += head + tail[::-1]
+
+        straight_colors += sorted_hue
+    
 
     return straight_colors
     
+def sort_by_SOM(colors_with_ids, som_length=100):
+    # Extract just the color values for SOM training
+    colors = np.array([color for color, _ in colors_with_ids])
+
+    som = MiniSom(1, som_length, 3, sigma=5.0, learning_rate=0.4)
+    som.random_weights_init(colors)
+    som.train_random(colors, num_iteration=1000)
+
+    # Retrieve the sorted colors and their IDs
+    sorted_colors_with_ids = []
+    win_map = som.win_map(colors)
+    for i in range(som_length):
+        # Find the best matching unit for each neuron
+        if (0, i) in win_map:
+            for color in win_map[(0, i)]:
+                # Find the original ID of the color
+                original_id = next(color_id for original_color, color_id in colors_with_ids if np.array_equal(original_color, color))
+                sorted_colors_with_ids.append((color, original_id))
+
+    return sorted_colors_with_ids
+
 
 if __name__ == '__main__':
-    color_count = 600
-    for i in range(1):
-        rgb_colors = np.random.rand(color_count, 3) * 255.0  # 100 random colors
+    rgb_colors = generate_colors_with_ids(100)  # 100 random colors
 
-        colors = sort_by_rainbow(rgb_colors)
-        init_color_display(colors)
+    init_color_display(rgb_colors)
+    sorted_colors_with_ids = sort_by_SOM(rgb_colors)
+    sorted_colors = np.array([color for color, _ in sorted_colors_with_ids])
+    init_color_display(sorted_colors.reshape(-1, 1, 3))

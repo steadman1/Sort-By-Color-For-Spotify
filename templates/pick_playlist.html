@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playlist Sorter</title>
+</head>
+<body>
+    <h1>Hi {{ display_name }}, select a playlist to sort</h1>
+    {% for playlist in playlists %}
+        <form action="/sort_playlist">
+            <input type="hidden" name="playlist_id" value="{{ playlist.id }}">
+            <button type="submit">{{ playlist["name"] }}</button>
+        </form>
+    {% endfor %}
+</body>
+</html>

@@ -7,12 +7,6 @@
     <title>Playlist Sorter</title>
 </head>
 <body>
-    <h1>Hi {{ display_name }}, select a playlist to sort</h1>
-    {% for playlist in playlists %}
-        <form action="/sort_playlist">
-            <input type="hidden" name="playlist_id" value="{{ playlist.id }}">
-            <button type="submit">{{ playlist.name }}</button>
-        </form>
-    {% endfor % }
+    <h1>Hi {{ display_name }}, the playlist has been sorted</h1>
 </body>
 </html>

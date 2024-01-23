@@ -32,7 +32,7 @@ def login():
     return redirect(auth_url)
 
 @app.route('/callback')
-def callback():
+def callback_route():
     global user_info, access_token
     code = request.args.get('code')
     state = request.args.get('state')
@@ -65,17 +65,25 @@ def callback():
     else:
         return 'Failed to retrieve access token', 400
     
-@app.route('/sort_playlist', methods=['GET', 'POST'])
-def create_playlist_route():
-     if request.method == 'POST':
-        playlist_id = request.form.get('playlist_id')
-        # Now you can use playlist_id to perform your actions
-        return f"Playlist ID: {playlist_id} sorted!"
-    else:
-        if not user_info:
-            return 'User not logged in', 400
+@app.route('/pick_playlist')
+def pick_playlist_route():
+    if not user_info:
+        return 'User not logged in', 400
+    
+    playlists = get_all_playlists(access_token)["items"]
 
-        return render_template('sort_playlist.html', playlists=get_all_playlists(access_token))
+    return render_template('pick_playlist.html', display_name=user_info['display_name'], playlists=playlists)
+
+@app.route('/sort_playlist')
+def sort_playlist_route():
+    if not user_info:
+        return 'User not logged in', 400
+    
+    playlist_id = request.args.get('playlist_id')
+
+    create_playlist(access_token, playlist_id, user_info)
+
+    return render_template('sort_playlist.html', display_name=user_info['display_name'])
 
 if __name__ == '__main__':
     app.run(debug=True)
