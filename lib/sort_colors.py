@@ -134,14 +134,4 @@ if __name__ == '__main__':
         rgb_colors = np.random.rand(color_count, 3) * 255.0  # 100 random colors
 
         colors = sort_by_rainbow(rgb_colors)
-
-        print(len(colors))
-
-        # if len(colors) != color_count:
-        #     difference = []
-        #     for color in rgb_colors:
-        #         if not np.array(color) in np.array(colors):
-        #             difference.append(color)
-
-        #     print(difference)
         init_color_display(colors)
