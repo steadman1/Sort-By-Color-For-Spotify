@@ -30,6 +30,6 @@ Hue sorting was definitely the move, and I was able to accomplish exactly what I
 
 ### Resources / Citations
 - [1] https://stackoverflow.com/questions/3014402/sorting-a-list-of-colors-in-one-dimension
-- [2] https://en.wikipedia.org/wiki/Dimensionality_reduction#:~:text=Dimensionality%20reduction%2C%20or%20dimension%20reduction,close%20to%20its%20intrinsic%20dimension.
+- [2] https://en.wikipedia.org/wiki/Dimensionality_reduction
 - [3] https://alienryderflex.com/hsp.html
 - [4] https://stackoverflow.com/questions/23090019/fastest-formula-to-get-hue-from-rgb
