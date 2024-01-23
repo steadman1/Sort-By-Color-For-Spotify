@@ -1,17 +1,21 @@
 import requests
 from .image_to_color import image_to_color
-from .sort_colors import sort_by_SOM, sort_by_rainbow, init_color_display
+from .sort_colors import sort_by_SOM, init_color_display
 
 def get_all_playlists(access_token, offset=0):
     playlist_items = []
+    href = f"https://api.spotify.com/v1/me/playlists?offset{offset}&limit=20"
     headers = {
         "Authorization": f"Bearer {access_token}"
     }
     while True:
-        response = requests.get(f"https://api.spotify.com/v1/me/playlists?offset{offset}", headers=headers)
-        if response.status_code != 200 or len(response["items"]) <= 0:
+        response = requests.get(href, headers=headers)
+        href = response.json()["next"]
+
+        if response.status_code != 200 or href is None:
             break
-        playlist_items.append(response.json()["items"])
+        playlist_items += response.json()["items"]
+
     return playlist_items
 
 def get_track_image(track):
@@ -37,7 +41,7 @@ def create_playlist(access_token, playlist_id, user_info):
     }
     data = {
         "name": f"{playlist['name']} (Sorted)",
-        "description": "My cool playlist description",
+        "description": f"First 100 songs of {playlist['name']} sorted by color.",
         "public": False,
     }
 

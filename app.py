@@ -70,7 +70,7 @@ def pick_playlist_route():
     if not user_info:
         return 'User not logged in', 400
     
-    playlists = get_all_playlists(access_token, )["items"]
+    playlists = get_all_playlists(access_token)
 
     return render_template('pick_playlist.html', display_name=user_info['display_name'], playlists=playlists)
 

@@ -38,7 +38,7 @@ def init_color_display(colors_with_ids):
     pygame.quit()
 
 def generate_colors_with_ids(n_colors):
-    return [(np.random.rand(3) * 255.0, i) for i in range(n_colors)]
+    return [(np.random.randint(0, 255, 3), i) for i in range(n_colors)]
 
 def sort_by_color_distance(colors):
     colors = np.array(colors) / 255.0
@@ -131,12 +131,15 @@ def sort_by_rainbow(colors_with_ids):
     return straight_colors
     
 def sort_by_SOM(colors_with_ids, som_length=100):
+    # to prevent ids being duplicated if color is exactly the same
+    used_ids = set()
+
     # Extract just the color values for SOM training
     colors = np.array([color for color, _ in colors_with_ids])
 
-    som = MiniSom(1, som_length, 3, sigma=5.0, learning_rate=0.4)
+    som = MiniSom(1, som_length, 3, sigma=5.0, learning_rate=0.8)
     som.random_weights_init(colors)
-    som.train_random(colors, num_iteration=1000)
+    som.train_random(colors, num_iteration=10000)
 
     # Retrieve the sorted colors and their IDs
     sorted_colors_with_ids = []
@@ -146,14 +149,17 @@ def sort_by_SOM(colors_with_ids, som_length=100):
         if (0, i) in win_map:
             for color in win_map[(0, i)]:
                 # Find the original ID of the color
-                original_id = next(color_id for original_color, color_id in colors_with_ids if np.array_equal(original_color, color))
-                sorted_colors_with_ids.append((color, original_id))
+                for original_color, color_id in colors_with_ids:
+                    if np.array_equal(original_color, color) and color_id not in used_ids:
+                        sorted_colors_with_ids.append((color, color_id))
+                        used_ids.add(color_id)
+                        break
 
     return sorted_colors_with_ids
 
 
 if __name__ == '__main__':
-    rgb_colors = generate_colors_with_ids(100)  # 100 random colors
+    rgb_colors = generate_colors_with_ids(600)  # 100 random colors
 
     init_color_display(rgb_colors)
     sorted_colors_with_ids = sort_by_SOM(rgb_colors)
