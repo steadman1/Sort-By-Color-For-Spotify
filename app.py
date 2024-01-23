@@ -1,7 +1,7 @@
-from flask import Flask, request, redirect
+from flask import Flask, request, redirect, render_template
 import requests
 import urllib.parse
-from lib.create_playlist import create_playlist
+from lib.playlist_tools import create_playlist, get_all_playlists
 
 app = Flask(__name__)
 
@@ -61,21 +61,21 @@ def callback():
             'Authorization': f'Bearer {access_token}'
         }
         user_info = requests.get('https://api.spotify.com/v1/me', headers=headers).json()
-        return f'Hello, {user_info["display_name"]}!'
+        return render_template('index.html', display_name=user_info['display_name'])
     else:
         return 'Failed to retrieve access token', 400
     
-@app.route('/create_playlist')
+@app.route('/sort_playlist', methods=['GET', 'POST'])
 def create_playlist_route():
+     if request.method == 'POST':
+        playlist_id = request.form.get('playlist_id')
+        # Now you can use playlist_id to perform your actions
+        return f"Playlist ID: {playlist_id} sorted!"
+    else:
+        if not user_info:
+            return 'User not logged in', 400
 
-    print(user_info)
-
-    if not user_info:
-        return 'User not logged in', 400
-    
-    create_playlist(access_token, user_info)
-
-    return 'Playlist created!'
+        return render_template('sort_playlist.html', playlists=get_all_playlists(access_token))
 
 if __name__ == '__main__':
     app.run(debug=True)
