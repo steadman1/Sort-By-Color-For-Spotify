@@ -2,12 +2,17 @@ import requests
 from .image_to_color import image_to_color
 from .sort_colors import sort_by_SOM, sort_by_rainbow, init_color_display
 
-def get_all_playlists(access_token):
+def get_all_playlists(access_token, offset=0):
+    playlist_items = []
     headers = {
         "Authorization": f"Bearer {access_token}"
     }
-    response = requests.get("https://api.spotify.com/v1/me/playlists", headers=headers)
-    return response.json()
+    while True:
+        response = requests.get(f"https://api.spotify.com/v1/me/playlists?offset{offset}", headers=headers)
+        if response.status_code != 200 or len(response["items"]) <= 0:
+            break
+        playlist_items.append(response.json()["items"])
+    return playlist_items
 
 def get_track_image(track):
     images = track["track"]["album"]["images"]
