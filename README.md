@@ -33,3 +33,4 @@ Hue sorting was definitely the move, and I was able to accomplish exactly what I
 - [2] https://en.wikipedia.org/wiki/Dimensionality_reduction
 - [3] https://alienryderflex.com/hsp.html
 - [4] https://stackoverflow.com/questions/23090019/fastest-formula-to-get-hue-from-rgb
+- [5] https://medium.com/towards-data-science/machine-learning-to-visually-sort-7349d3660e1
